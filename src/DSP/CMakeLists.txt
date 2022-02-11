@@ -25,13 +25,13 @@ set_target_properties(aether_dsp
 target_compile_definitions(aether_dsp PRIVATE "$<$<CONFIG:RELEASE>:NDEBUG>")
 
 # Architecture
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(i386)|(i686)|(AMD64)")
-	if (MSVC)
-		target_compile_options(aether_dsp PRIVATE /arch:SSE2)
-	else()
-		target_compile_options(aether_dsp PRIVATE -msse2)
-	endif()
-endif()
+#if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(i386)|(i686)|(AMD64)")
+#	if (MSVC)
+#		target_compile_options(aether_dsp PRIVATE /arch:SSE2)
+#	else()
+#		target_compile_options(aether_dsp PRIVATE -msse2)
+#	endif()
+#endif()
 
 
 # Platform
