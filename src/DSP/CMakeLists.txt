@@ -24,6 +24,7 @@ set_target_properties(aether_dsp
 
 target_compile_definitions(aether_dsp PRIVATE "$<$<CONFIG:RELEASE>:NDEBUG>")
 
+target_compile_options(aether_dsp PRIVATE -funsafe-math-optimizations)
 # Architecture
 #if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(i386)|(i686)|(AMD64)")
 #	if (MSVC)
