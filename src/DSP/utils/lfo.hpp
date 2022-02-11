@@ -6,10 +6,10 @@
 #include "../../common/constants.hpp"
 
 class LFO {
-	static constexpr double pi = constants::pi;
+	static constexpr float pi = constants::pi;
 public:
 	LFO() {}
-	LFO(float phase, float rate = 0.f) : m_phase{std::polar(1.0, 2*pi*static_cast<double>(phase))} {
+	LFO(float phase, float rate = 0.f) : m_phase{std::polar(1.0f, 2*pi*static_cast<float>(phase))} {
 		set_rate(rate);
 	}
 
@@ -19,12 +19,12 @@ public:
 
 	// rate is in cycles/sample
 	void set_rate(float rate) noexcept {
-		m_step = std::polar(1.0, 2*pi*static_cast<double>(rate));
+		m_step = std::polar(1.0f, 2*pi*static_cast<float>(rate));
 	}
 
 private:
-	std::complex<double> m_step = 1.0;
-	std::complex<double> m_phase = 1.0;
+	std::complex<float> m_step = 1.0;
+	std::complex<float> m_phase = 1.0;
 };
 
 #endif

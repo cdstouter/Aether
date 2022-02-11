@@ -206,7 +206,7 @@ namespace Aether {
 			float late_left = early_left;
 			float late_right = early_right;
 			{
-				AllpassDiffuser<double>::PushInfo diffuser_info = {};
+				AllpassDiffuser<float>::PushInfo diffuser_info = {};
 				diffuser_info.stages = static_cast<uint32_t>(params.late_diffusion_stages);
 				diffuser_info.feedback = params.late_diffusion_feedback;
 				diffuser_info.interpolate = params.interpolate > 0;
@@ -238,8 +238,8 @@ namespace Aether {
 				peak_dry.second = std::max(peak_dry.second, std::abs(dry_right));
 				peak_dry_stage.first = std::max(peak_dry_stage.first, std::abs(dry_left*dry_level));
 				peak_dry_stage.second = std::max(peak_dry_stage.second, std::abs(dry_right*dry_level));
-				peak_predelay_stage.first = std::max(peak_predelay_stage.first, std::abs(predelay_left*predelay_level));
-				peak_predelay_stage.second = std::max(peak_predelay_stage.second, std::abs(predelay_right*predelay_level));
+				//peak_predelay_stage.first = std::max(peak_predelay_stage.first, std::abs(predelay_left*predelay_level));
+				//peak_predelay_stage.second = std::max(peak_predelay_stage.second, std::abs(predelay_right*predelay_level));
 				peak_early_stage.first = std::max(peak_early_stage.first, std::abs(early_left*early_level));
 				peak_early_stage.second = std::max(peak_early_stage.second, std::abs(early_right*early_level));
 				peak_late_stage.first = std::max(peak_late_stage.first, std::abs(late_left*late_level));

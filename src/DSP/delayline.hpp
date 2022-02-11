@@ -25,9 +25,9 @@ public:
 			bool hc_enable;
 		};
 
-		Filters(double rate) : ls(rate), hs(rate), hc(rate) {}
+		Filters(float rate) : ls(rate), hs(rate), hc(rate) {}
 
-		double push(double sample, PushInfo info) noexcept {
+		float push(float sample, PushInfo info) noexcept {
 			if (info.ls_enable) sample = ls.push(sample);
 			if (info.hs_enable) sample = hs.push(sample);
 			if (info.hc_enable) sample = hc.push(sample);
@@ -40,19 +40,19 @@ public:
 			hc.clear();
 		}
 
-		Lowshelf<double> ls;
-		Highshelf<double> hs;
-		Lowpass6dB<double> hc;
+		Lowshelf<float> ls;
+		Highshelf<float> hs;
+		Lowpass6dB<float> hc;
 	};
 
 	struct PushInfo {
 		Order order;
-		AllpassDiffuser<double>::PushInfo diffuser_info;
+		AllpassDiffuser<float>::PushInfo diffuser_info;
 		Filters::PushInfo damping_info;
 	};
 
-	ModulatedDelay<double> delay;
-	AllpassDiffuser<double> diffuser;
+	ModulatedDelay<float> delay;
+	AllpassDiffuser<float> diffuser;
 	Filters damping;
 
 	// Member Functions
@@ -61,12 +61,12 @@ public:
 	Delayline(float rate, RNG& rng) :
 		delay(rate, std::uniform_real_distribution<float>{0.f, 1.f}(rng) ),
 		diffuser(rate, rng),
-		damping(static_cast<double>(rate))
+		damping(static_cast<float>(rate))
 	{}
 
-	void set_feedback(float feedback) { m_feedback = static_cast<double>(feedback); }
+	void set_feedback(float feedback) { m_feedback = static_cast<float>(feedback); }
 
-	double push(double sample, PushInfo info) {
+	float push(float sample, PushInfo info) {
 		m_last_out = damping.push(m_last_out, info.damping_info);
 
 		sample += m_last_out*m_feedback;
@@ -94,9 +94,9 @@ public:
 	}
 
 private:
-	double m_last_out = 0;
+	float m_last_out = 0;
 
-	double m_feedback = 0;
+	float m_feedback = 0;
 };
 
 
@@ -185,23 +185,23 @@ public:
 	// Filter
 	void set_low_shelf_cutoff(float cutoff) {
 		for (auto& line : m_delay_lines)
-			line.damping.ls.set_cutoff(static_cast<double>(cutoff));
+			line.damping.ls.set_cutoff(static_cast<float>(cutoff));
 	}
 	void set_low_shelf_gain(float gain) {
 		for (auto& line : m_delay_lines)
-			line.damping.ls.set_gain(static_cast<double>(gain));
+			line.damping.ls.set_gain(static_cast<float>(gain));
 	}
 	void set_high_shelf_cutoff(float cutoff) {
 		for (auto& line : m_delay_lines)
-			line.damping.hs.set_cutoff(static_cast<double>(cutoff));
+			line.damping.hs.set_cutoff(static_cast<float>(cutoff));
 	}
 	void set_high_shelf_gain(float gain) {
 		for (auto& line : m_delay_lines)
-			line.damping.hs.set_gain(static_cast<double>(gain));
+			line.damping.hs.set_gain(static_cast<float>(gain));
 	}
 	void set_high_cut_cutoff(float cutoff) {
 		for (auto& line : m_delay_lines)
-			line.damping.hc.set_cutoff(static_cast<double>(cutoff));
+			line.damping.hc.set_cutoff(static_cast<float>(cutoff));
 	}
 
 
@@ -209,9 +209,9 @@ public:
 		float sample,
 		Delayline::PushInfo push_info
 	) noexcept {
-		double output = 0;
+		float output = 0;
 		for (uint32_t i = 0; i < m_lines; ++i)
-			output += m_delay_lines[i].push(static_cast<double>(sample), push_info);
+			output += m_delay_lines[i].push(static_cast<float>(sample), push_info);
 
 		m_gain = m_gain - m_gain_smoothing*(m_gain-m_gain_target);
 		return m_gain*static_cast<float>(output);
@@ -219,10 +219,10 @@ public:
 
 	static constexpr uint32_t max_lines = 12;
 
-	static constexpr float max_delay = ModulatedDelay<double>::max_delay/1.5f;
-	static constexpr float max_delay_mod = ModulatedDelay<double>::max_mod/1.15f;
+	static constexpr float max_delay = ModulatedDelay<float>::max_delay/1.5f;
+	static constexpr float max_delay_mod = ModulatedDelay<float>::max_mod/1.15f;
 
-	static constexpr float max_diffuse_delay_mod = ModulatedDelay<double>::max_mod/1.15f;
+	static constexpr float max_diffuse_delay_mod = ModulatedDelay<float>::max_mod/1.15f;
 private:
 	std::array<Delayline, max_lines> m_delay_lines;
 	std::array<float, 3*max_lines> m_rand = {};
