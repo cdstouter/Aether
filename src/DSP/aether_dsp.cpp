@@ -4,6 +4,7 @@
 
 // Lv2
 #include <lv2/atom/util.h>
+#include <thread>
 
 #include "aether_dsp.hpp"
 #include "utils/math.hpp"
@@ -21,6 +22,8 @@ namespace Aether {
 	DSP::DSP(float rate) :
 		m_l_predelay(rate),
 		m_r_predelay(rate),
+        l_predelay_samples(),
+        r_predelay_samples(),
 		m_l_early_filters(rate),
 		m_r_early_filters(rate),
 		m_l_early_multitap(rate),
@@ -129,127 +132,182 @@ namespace Aether {
 //			peak_out = {0,0};
 
 		update_parameter_targets();
-		for (uint32_t sample = 0; sample < n_samples; ++sample) {
-			update_parameters();
+        update_parameters();
 
-			// Dry
-			float dry_level = params.dry_level/100.f;
-			float dry_left = ports.audio_in_left[sample];
-			//float dry_right = ports.audio_in_right[sample];
-			{
-				ports.audio_out_left[sample] = dry_level*dry_left;
-                ports.audio_out_right[sample] = 0.0f;
-				//ports.audio_out_right[sample] = dry_level*dry_right;
-			}
+        if (n_samples > l_predelay_samples.size()) {
+            l_predelay_samples.resize(n_samples);
+            r_predelay_samples.resize(n_samples);
+        }
 
-			// Predelay
-			float predelay_level = params.predelay_level/100.f;
-			float predelay_left = dry_left;
-			//float predelay_right = dry_right;
-			{
-				//float width = 0.5f-params.width/200.f;
-				//predelay_left  = dry_left  + width * (dry_right - dry_left);
-				//predelay_right = dry_right - width * (dry_right - dry_left);
-                predelay_left = dry_left;
+        // Dry & Predelay
+        for (uint32_t sample = 0; sample < n_samples; ++sample) {
+            // Dry
+            float dry_level = params.dry_level/100.f;
+            float dry_left = ports.audio_in_left[sample];
+            float dry_right = ports.audio_in_right[sample];
+            {
+                ports.audio_out_left[sample] = dry_level*dry_left;
+                ports.audio_out_right[sample] = dry_level*dry_right;
+            }
 
-				// predelay in samples
-				uint32_t delay = static_cast<uint32_t>(params.predelay/1000.f*m_rate);
-				predelay_left = m_l_predelay.push(predelay_left, delay);
-				//predelay_right = m_r_predelay.push(predelay_right, delay);
+            // Predelay
+            float predelay_level = params.predelay_level/100.f;
+            float predelay_left = dry_left;
+            float predelay_right = dry_right;
+            {
+                float width = 0.5f-params.width/200.f;
+                predelay_left  = dry_left  + width * (dry_right - dry_left);
+                predelay_right = dry_right - width * (dry_right - dry_left);
 
-				ports.audio_out_left[sample] += predelay_level*predelay_left;
-				//ports.audio_out_right[sample] += predelay_level*predelay_right;
-			}
+                // predelay in samples
+                uint32_t delay = static_cast<uint32_t>(params.predelay/1000.f*m_rate);
+                predelay_left = m_l_predelay.push(predelay_left, delay);
+                predelay_right = m_r_predelay.push(predelay_right, delay);
+                l_predelay_samples[sample] = predelay_left;
+                r_predelay_samples[sample] = predelay_right;
 
-			// Early Reflections
-			float early_level = params.early_level/100.f;
-			float early_left = predelay_left;
-			//float early_right = predelay_right;
-			{
-				// Filtering
-				if (params.early_low_cut_enabled > 0.f) {
-					early_left = m_l_early_filters.highpass.push(early_left);
-					//early_right = m_r_early_filters.highpass.push(early_right);
-				}
+                ports.audio_out_left[sample] += predelay_level*predelay_left;
+                ports.audio_out_right[sample] += predelay_level*predelay_right;
+            }
+        }
 
-				if (params.early_high_cut_enabled > 0.f) {
-					early_left = m_l_early_filters.lowpass.push(early_left);
-					//early_right = m_r_early_filters.lowpass.push(early_right);
-				}
+        // Left
+        std::thread left_processing([&]() {
+            for (uint32_t sample = 0; sample < n_samples; ++sample) {
+                // Early Reflections
+                float early_level = params.early_level/100.f;
+                float early_left = l_predelay_samples[sample];
+                {
+                    // Filtering
+                    if (params.early_low_cut_enabled > 0.f) {
+                        early_left = m_l_early_filters.highpass.push(early_left);
+                    }
 
-				{ // multitap delay
-					uint32_t taps = static_cast<uint32_t>(params.early_taps);
-					float length = params.early_tap_length/1000.f*m_rate;
+                    if (params.early_high_cut_enabled > 0.f) {
+                        early_left = m_l_early_filters.lowpass.push(early_left);
+                    }
 
-					float multitap_left = m_l_early_multitap.push(early_left, taps, length);
-					//float multitap_right = m_r_early_multitap.push(early_right, taps, length);
+                    { // multitap delay
+                        uint32_t taps = static_cast<uint32_t>(params.early_taps);
+                        float length = params.early_tap_length/1000.f*m_rate;
 
-					float tap_mix = params.early_tap_mix/100.f;
-					early_left  += tap_mix * (multitap_left  - early_left );
-					//early_right += tap_mix * (multitap_right - early_right);
-				}
+                        float multitap_left = m_l_early_multitap.push(early_left, taps, length);
 
-				{ // allpass diffuser
-					AllpassDiffuser<float>::PushInfo info = {};
-					info.stages = static_cast<uint32_t>(params.early_diffusion_stages);
-					info.feedback = params.early_diffusion_feedback;
-					info.interpolate = true;
+                        float tap_mix = params.early_tap_mix/100.f;
+                        early_left  += tap_mix * (multitap_left  - early_left );
+                    }
 
-					early_left = m_l_early_diffuser.push(early_left, info);
-					//early_right = m_r_early_diffuser.push(early_right, info);
-				}
+                    { // allpass diffuser
+                        AllpassDiffuser<float>::PushInfo info = {};
+                        info.stages = static_cast<uint32_t>(params.early_diffusion_stages);
+                        info.feedback = params.early_diffusion_feedback;
+                        info.interpolate = true;
 
-				ports.audio_out_left[sample] += early_level*early_left;
-				//ports.audio_out_right[sample] += early_level*early_right;
-			}
+                        early_left = m_l_early_diffuser.push(early_left, info);
+                    }
 
-			// Late Reverberations
-			float late_level = params.late_level/100.f;
-			float late_left = early_left;
-			//float late_right = early_right;
-			{
-				AllpassDiffuser<float>::PushInfo diffuser_info = {};
-				diffuser_info.stages = static_cast<uint32_t>(params.late_diffusion_stages);
-				diffuser_info.feedback = params.late_diffusion_feedback;
-				diffuser_info.interpolate = params.interpolate > 0;
+                    ports.audio_out_left[sample] += early_level*early_left;
+                }
 
-				Delayline::Filters::PushInfo damping_info = {};
-				damping_info.ls_enable = params.late_low_shelf_enabled > 0;
-				damping_info.hs_enable = params.late_high_shelf_enabled > 0;
-				damping_info.hc_enable = params.late_high_cut_enabled > 0;
+                // Late Reverberations
+                float late_level = params.late_level/100.f;
+                float late_left = early_left;
+                {
+                    AllpassDiffuser<float>::PushInfo diffuser_info = {};
+                    diffuser_info.stages = static_cast<uint32_t>(params.late_diffusion_stages);
+                    diffuser_info.feedback = params.late_diffusion_feedback;
+                    diffuser_info.interpolate = params.interpolate > 0;
 
-				Delayline::PushInfo push_info = {};
-				push_info.order = static_cast<Delayline::Order>(params.late_order);
-				push_info.diffuser_info = diffuser_info;
-				push_info.damping_info = damping_info;
+                    Delayline::Filters::PushInfo damping_info = {};
+                    damping_info.ls_enable = params.late_low_shelf_enabled > 0;
+                    damping_info.hs_enable = params.late_high_shelf_enabled > 0;
+                    damping_info.hc_enable = params.late_high_cut_enabled > 0;
 
-				late_left = m_l_late_rev.push(late_left, push_info);
-				//late_right = m_r_late_rev.push(late_right, push_info);
-				ports.audio_out_left[sample] += late_level*late_left;
-				//ports.audio_out_right[sample] += late_level*late_right;
-			}
+                    Delayline::PushInfo push_info = {};
+                    push_info.order = static_cast<Delayline::Order>(params.late_order);
+                    push_info.diffuser_info = diffuser_info;
+                    push_info.damping_info = damping_info;
 
-			{
-				float mix = params.mix/100.f;
-				ports.audio_out_left[sample] = math::lerp(dry_left, ports.audio_out_left[sample], mix);
-				//ports.audio_out_right[sample] = math::lerp(dry_right, ports.audio_out_right[sample], mix);
-			}
+                    late_left = m_l_late_rev.push(late_left, push_info);
+                    ports.audio_out_left[sample] += late_level*late_left;
+                }
 
-//			if (notify_ui) {
-//				peak_dry.first = std::max(peak_dry.first, std::abs(dry_left));
-//				peak_dry.second = std::max(peak_dry.second, std::abs(dry_right));
-//				peak_dry_stage.first = std::max(peak_dry_stage.first, std::abs(dry_left*dry_level));
-//				peak_dry_stage.second = std::max(peak_dry_stage.second, std::abs(dry_right*dry_level));
-//				peak_predelay_stage.first = std::max(peak_predelay_stage.first, std::abs(predelay_left*predelay_level));
-//				peak_predelay_stage.second = std::max(peak_predelay_stage.second, std::abs(predelay_right*predelay_level));
-//				peak_early_stage.first = std::max(peak_early_stage.first, std::abs(early_left*early_level));
-//				peak_early_stage.second = std::max(peak_early_stage.second, std::abs(early_right*early_level));
-//				peak_late_stage.first = std::max(peak_late_stage.first, std::abs(late_left*late_level));
-//				peak_late_stage.second = std::max(peak_late_stage.second, std::abs(late_right*late_level));
-//				peak_out.first = std::max(peak_out.first, std::abs(ports.audio_out_left[sample]));
-//				peak_out.second = std::max(peak_out.second, std::abs(ports.audio_out_right[sample]));
-//			}
-		}
+                {
+                    float mix = params.mix/100.f;
+                    ports.audio_out_left[sample] = math::lerp(ports.audio_in_left[sample], ports.audio_out_left[sample], mix);
+                }
+            }
+        });
+        // Right
+        std::thread right_processing([&]() {
+            for (uint32_t sample = 0; sample < n_samples; ++sample) {
+                // Early Reflections
+                float early_level = params.early_level/100.f;
+                float early_right = r_predelay_samples[sample];
+                {
+                    // Filtering
+                    if (params.early_low_cut_enabled > 0.f) {
+                        early_right = m_r_early_filters.highpass.push(early_right);
+                    }
+
+                    if (params.early_high_cut_enabled > 0.f) {
+                        early_right = m_r_early_filters.lowpass.push(early_right);
+                    }
+
+                    { // multitap delay
+                        uint32_t taps = static_cast<uint32_t>(params.early_taps);
+                        float length = params.early_tap_length/1000.f*m_rate;
+
+                        float multitap_right = m_r_early_multitap.push(early_right, taps, length);
+
+                        float tap_mix = params.early_tap_mix/100.f;
+                        early_right += tap_mix * (multitap_right - early_right);
+                    }
+
+                    { // allpass diffuser
+                        AllpassDiffuser<float>::PushInfo info = {};
+                        info.stages = static_cast<uint32_t>(params.early_diffusion_stages);
+                        info.feedback = params.early_diffusion_feedback;
+                        info.interpolate = true;
+
+                        early_right = m_r_early_diffuser.push(early_right, info);
+                    }
+
+                    ports.audio_out_right[sample] += early_level*early_right;
+                }
+
+                // Late Reverberations
+                float late_level = params.late_level/100.f;
+                float late_right = early_right;
+                {
+                    AllpassDiffuser<float>::PushInfo diffuser_info = {};
+                    diffuser_info.stages = static_cast<uint32_t>(params.late_diffusion_stages);
+                    diffuser_info.feedback = params.late_diffusion_feedback;
+                    diffuser_info.interpolate = params.interpolate > 0;
+
+                    Delayline::Filters::PushInfo damping_info = {};
+                    damping_info.ls_enable = params.late_low_shelf_enabled > 0;
+                    damping_info.hs_enable = params.late_high_shelf_enabled > 0;
+                    damping_info.hc_enable = params.late_high_cut_enabled > 0;
+
+                    Delayline::PushInfo push_info = {};
+                    push_info.order = static_cast<Delayline::Order>(params.late_order);
+                    push_info.diffuser_info = diffuser_info;
+                    push_info.damping_info = damping_info;
+
+                    late_right = m_r_late_rev.push(late_right, push_info);
+                    ports.audio_out_right[sample] += late_level*late_right;
+                }
+
+                {
+                    float mix = params.mix/100.f;
+                    ports.audio_out_right[sample] = math::lerp(ports.audio_in_right[sample], ports.audio_out_right[sample], mix);
+                }
+            }
+        });
+        left_processing.join();
+        right_processing.join();
+
 //		if (notify_ui) {
 //			// write peak data
 //			lv2_atom_forge_frame_time(&atom_forge, 0);
@@ -339,7 +397,8 @@ namespace Aether {
 
 	void DSP::update_parameters() noexcept {
 		for (size_t p = 0; p < param_ports.size(); ++p) {
-			const float new_value = param_targets[p] - param_smooth[p] * (param_targets[p] - params[p]);
+			//const float new_value = param_targets[p] - param_smooth[p] * (param_targets[p] - params[p]);
+            const float new_value = param_targets[p];
 			params_modified[p] = (new_value != params[p]);
 			params[p] = new_value;
 		}

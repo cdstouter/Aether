@@ -177,6 +177,7 @@ namespace Aether {
 		// Predelay
 		Delay m_l_predelay;
 		Delay m_r_predelay;
+        std::vector<float> l_predelay_samples, r_predelay_samples;
 
 		// Early
 		struct Filters {
