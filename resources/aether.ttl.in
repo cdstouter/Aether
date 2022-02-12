@@ -187,7 +187,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 14;
 		lv2:symbol "early_low_cut_enabled";
-		lv2:name "Early Low Cut Enabled";
+		lv2:name "E LC Enabled";
 		rdfs:comment "Enables/Disables the low cut filter applied before the signal enters the reverberation unit";
 		lv2:portProperty lv2:toggled;
 		lv2:default 0;
@@ -197,7 +197,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 15;
 		lv2:symbol "early_low_cut_cutoff";
-		lv2:name "Early Low Cut Cutoff";
+		lv2:name "E LC Cutoff";
 		rdfs:comment "The cutoff frequency of the low cut filter applied before the signal enters the reverberation unit";
 		lv2:portProperty props:logarithmic;
 		lv2:default 15.0;
@@ -208,7 +208,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 16;
 		lv2:symbol "early_high_cut_enabled";
-		lv2:name "Early High Cut Enabled";
+		lv2:name "E HC Enabled";
 		rdfs:comment "Enables/Disables the high cut filter applied before the signal enters the reverberation unit";
 		lv2:portProperty lv2:toggled;
 		lv2:default 0;
@@ -218,7 +218,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 17;
 		lv2:symbol "early_high_cut_cutoff";
-		lv2:name "Early High Cut Cutoff";
+		lv2:name "E HC Cutoff";
 		rdfs:comment "The cutoff frequency of the high cut filter applied before the signal enters the reverberation unit";
 		lv2:portProperty props:logarithmic;
 		lv2:default 20000;
@@ -239,7 +239,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 19;
 		lv2:symbol "early_tap_length";
-		lv2:name "Early Delay Length";
+		lv2:name "E delay Length";
 		rdfs:comment "The length of the early reflections multitap delay";
 		lv2:default 200.0;
 		lv2:minimum 0.0;
@@ -259,7 +259,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 21;
 		lv2:symbol "early_tap_decay";
-		lv2:name "Early Tap Decay";
+		lv2:name "E Tap Decay";
 		rdfs:comment "The curvature of the early reflections impulse response";
 		lv2:default 0.5;
 		lv2:minimum 0;
@@ -269,7 +269,7 @@
 		lv2:index 22;
 		lv2:portProperty props:causesArtifacts;
 		lv2:symbol "early_diffusion_stages";
-		lv2:name "Early Diffusion Stages";
+		lv2:name "E Diff Stages";
 		rdfs:comment "The number of series allpass filters in the early reflections diffusion block";
 		lv2:portProperty lv2:integer;
 		lv2:default 7;
@@ -279,7 +279,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 23;
 		lv2:symbol "early_diffusion_delay";
-		lv2:name "Early Diffusion Delay";
+		lv2:name "E Diff Delay";
 		rdfs:comment "The delay in the early reflections diffusion block";
 		lv2:default 20;
 		lv2:minimum 10;
@@ -289,7 +289,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 24;
 		lv2:symbol "early_diffusion_mod_depth";
-		lv2:name "Early Diffusion Mod Depth";
+		lv2:name "E Diff Mod Depth";
 		rdfs:comment "The modulation depth of the early reflections diffusion block delay";
 		lv2:default 0.0;
 		lv2:minimum 0.0;
@@ -299,7 +299,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 25;
 		lv2:symbol "early_diffusion_mod_rate";
-		lv2:name "Early Diffusion Mod Rate";
+		lv2:name "E Diff Mod Rate";
 		rdfs:comment "The modulation rate of the early reflections diffusion block delay";
 		lv2:default 1;
 		lv2:minimum 0;
@@ -309,7 +309,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 26;
 		lv2:symbol "early_diffusion_feedback";
-		lv2:name "Early Diffusion Feedback";
+		lv2:name "E Diff Feedback";
 		rdfs:comment "The feedback in the early reflections diffusion block";
 		lv2:default 0.7;
 		lv2:minimum 0;
@@ -321,7 +321,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 27;
 		lv2:symbol "late_order";
-		lv2:name "Late Order";
+		lv2:name "L Order";
 		rdfs:comment "Controls the signal path in the late reverberation unit";
 		lv2:portProperty lv2:integer, lv2:enumeration;
 		lv2:scalePoints
@@ -334,7 +334,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 28;
 		lv2:symbol "late_delay_lines";
-		lv2:name "Late Delay Lines";
+		lv2:name "L Delay Lines";
 		rdfs:comment "The number of delay lines in the late reverberation unit";
 		lv2:portProperty lv2:integer;
 		lv2:default 3;
@@ -344,7 +344,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 29;
 		lv2:symbol "late_Delay";
-		lv2:name "Late Delay";
+		lv2:name "L Delay";
 		rdfs:comment "The delay time in the late reverberation delay lines";
 		lv2:default 100.0;
 		lv2:minimum 0.05;
@@ -354,7 +354,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 30;
 		lv2:symbol "late_delay_mod_depth";
-		lv2:name "Late Delay Mod Depth";
+		lv2:name "L Delay Mod Depth";
 		rdfs:comment "The modulation depth of the line delay";
 		lv2:default 0.2;
 		lv2:minimum 0.0;
@@ -364,7 +364,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 31;
 		lv2:symbol "late_delay_mod_rate";
-		lv2:name "Late Line Mod Rate";
+		lv2:name "L Line Mod Rate";
 		rdfs:comment "The modulation rate of the line delay";
 		lv2:default 0.2;
 		lv2:minimum 0.0;
@@ -374,7 +374,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 32;
 		lv2:symbol "late_delay_line_feedback";
-		lv2:name "Late Delay Line Feedback";
+		lv2:name "L Delay Line Feedback";
 		rdfs:comment "The delay line feedback";
 		lv2:default 0.7;
 		lv2:minimum 0.0;
@@ -385,7 +385,7 @@
 		lv2:index 33;
 		lv2:portProperty props:causesArtifacts;
 		lv2:symbol "late_diffusion_stages";
-		lv2:name "Late Diffusion Stages";
+		lv2:name "L Diff Stages";
 		rdfs:comment "The number of series allpass filters in the late diffusion block";
 		lv2:portProperty lv2:integer;
 		lv2:default 7;
@@ -395,7 +395,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 34;
 		lv2:symbol "late_diffusion_delay";
-		lv2:name "Late Diffusion Delay";
+		lv2:name "L Diff Delay";
 		rdfs:comment "The delay in the late diffusion block";
 		lv2:default 50;
 		lv2:minimum 10;
@@ -405,7 +405,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 35;
 		lv2:symbol "late_diffusion_mod_depth";
-		lv2:name "Late Diffusion Mod Depth";
+		lv2:name "L Diff Mod Depth";
 		rdfs:comment "The modulation depth of the late diffusion block delay";
 		lv2:default 0.2;
 		lv2:minimum 0.0;
@@ -415,7 +415,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 36;
 		lv2:symbol "late_diffusion_mod_rate";
-		lv2:name "Late Diffusion Mod Rate";
+		lv2:name "L Diff Mod Rate";
 		rdfs:comment "The modulation rate of the late diffusion block delay";
 		lv2:default 0.5;
 		lv2:minimum 0.0;
@@ -425,7 +425,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 37;
 		lv2:symbol "late_diffusion_feedback";
-		lv2:name "Late Diffusion Feedback";
+		lv2:name "L Diff Feedback";
 		rdfs:comment "The feedback in the late diffusion block";
 		lv2:default 0.7;
 		lv2:minimum 0.0;
@@ -435,7 +435,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 38;
 		lv2:symbol "late_low_shelf_enabled";
-		lv2:name "Late Low Shelf Enabled";
+		lv2:name "L LS Enabled";
 		rdfs:comment "Enables/Disables the late reverberations low shelf filter";
 		lv2:portProperty lv2:toggled;
 		lv2:default 0;
@@ -445,7 +445,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 39;
 		lv2:symbol "late_low_shelf_cutoff";
-		lv2:name "Late Low Shelf Cutoff";
+		lv2:name "L LS Cutoff";
 		rdfs:comment "The cutoff frequency of the late reverberations low shelf filter";
 		lv2:portProperty props:logarithmic;
 		lv2:default 100.0;
@@ -456,7 +456,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 40;
 		lv2:symbol "late_low_shelf_gain";
-		lv2:name "Late Low Shelf Gain";
+		lv2:name "L LS Gain";
 		rdfs:comment "The gain of the late reverberations low shelf filter";
 		lv2:default -2.0;
 		lv2:minimum -24.0;
@@ -466,7 +466,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 41;
 		lv2:symbol "late_high_shelf_enabled";
-		lv2:name "Late high Shelf Enabled";
+		lv2:name "L HS Enabled";
 		rdfs:comment "Enables/Disables the late reverberations high shelf filter";
 		lv2:portProperty lv2:toggled;
 		lv2:default 0;
@@ -476,7 +476,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 42;
 		lv2:symbol "late_high_shelf_cutoff";
-		lv2:name "Late high Shelf Cutoff";
+		lv2:name "L HS Cutoff";
 		rdfs:comment "The cutoff frequency of the late reverberations high shelf filter";
 		lv2:portProperty props:logarithmic;
 		lv2:default 1500.0;
@@ -487,7 +487,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 43;
 		lv2:symbol "late_high_shelf_gain";
-		lv2:name "Late high Shelf Gain";
+		lv2:name "L HS Gain";
 		rdfs:comment "The gain of the late reverberations high shelf filter";
 		lv2:default -3.0;
 		lv2:minimum -24.0;
@@ -497,7 +497,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 44;
 		lv2:symbol "late_high_cut_enabled";
-		lv2:name "Late High Cut Enabled";
+		lv2:name "L HC Enabled";
 		rdfs:comment "Enables/Disables the late reverberations high cut filter";
 		lv2:portProperty lv2:toggled;
 		lv2:default 0;
@@ -507,7 +507,7 @@
 		a lv2:InputPort, lv2:ControlPort;
 		lv2:index 45;
 		lv2:symbol "late_high_cut_cutoff";
-		lv2:name "Late High Cut Cutoff";
+		lv2:name "L HC Cutoff";
 		rdfs:comment "The cutoff frequency of the late reverberations high cut filter";
 		lv2:portProperty props:logarithmic;
 		lv2:default 20000;
@@ -542,7 +542,7 @@
 		lv2:index 48;
 		lv2:portProperty props:causesArtifacts;
 		lv2:symbol "early_diffusion_seed";
-		lv2:name "Early Diffusion Seed";
+		lv2:name "E Diff Seed";
 		rdfs:comment "The seed used by the early reflections diffusion block";
 		lv2:portProperty lv2:integer;
 		lv2:default 1;
@@ -564,7 +564,7 @@
 		lv2:index 50;
 		lv2:portProperty props:causesArtifacts;
 		lv2:symbol "late_diffusion_seed";
-		lv2:name "Late Diffusion Seed";
+		lv2:name "L Diff Seed";
 		rdfs:comment "The seed used by the late reverberations diffusion block";
 		lv2:portProperty lv2:integer;
 		lv2:default 1;
@@ -577,7 +577,7 @@
 		lv2:index 51;
 		lv2:portProperty lv2:connectionOptional;
 		lv2:symbol "early_diffusion_drive";
-		lv2:name "Early Diffusion Saturation Drive";
+		lv2:name "E Diff Drive";
 		rdfs:comment "Intensity of the saturation in the early diffusion allpass filter feedback loops";
 		lv2:default -12.0;
 		lv2:minimum -12.0;
@@ -592,7 +592,7 @@
 		lv2:index 52;
 		lv2:portProperty lv2:connectionOptional;
 		lv2:symbol "late_diffusion_drive";
-		lv2:name "Late Diffusion Saturation Drive";
+		lv2:name "L Diff Drive";
 		rdfs:comment "Intensity of the saturation in the early diffusion allpass filter feedback loops";
 		lv2:default -12.0;
 		lv2:minimum -12.0;
