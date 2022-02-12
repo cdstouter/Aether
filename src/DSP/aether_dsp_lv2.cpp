@@ -16,6 +16,9 @@
 
 #include "aether_dsp.hpp"
 
+// profiling
+#include "../../extern/rapid-profile.hpp"
+
 // LV2 Functions
 static LV2_Handle instantiate(
 	const LV2_Descriptor*,
@@ -23,6 +26,7 @@ static LV2_Handle instantiate(
 	const char*,
 	const LV2_Feature* const* features
 ) {
+    RAPID_PROFILE_INIT();
 	LV2_URID_Map* map = nullptr;
 	LV2_Log_Logger logger = {};
 

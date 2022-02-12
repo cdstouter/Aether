@@ -48,8 +48,8 @@ if (MSVC)
 	)
 else()
 	target_compile_options(aether_dsp PRIVATE
-		-Wall -Wextra -Wpedantic -Wshadow -Wstrict-aliasing
-		-Wunreachable-code -Wdouble-promotion -Weffc++ -Wconversion
+		-Wall -Wextra -Wpedantic -Wstrict-aliasing
+		-Wunreachable-code -Wconversion
 		-Wsign-conversion
 		"$<$<CONFIG:DEBUG>:-Og;-ggdb;-Werror>"
 		"$<$<CONFIG:RELEASE>:-Ofast>"

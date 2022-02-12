@@ -11,6 +11,9 @@
 #include "../common/utils.hpp"
 #include "../common/constants.hpp"
 
+// profiling
+#include "../../extern/rapid-profile.hpp"
+
 namespace {
 	float dBtoGain(float db) noexcept {
 		return std::pow(10.f, db/20.f);
@@ -94,6 +97,8 @@ namespace Aether {
 	}
 
 	void DSP::process(uint32_t n_samples) noexcept {
+        INTERVAL(PROCESS);
+        INTERVAL(INTRO_STUFF);
 		if (ports.control) {
 			LV2_ATOM_SEQUENCE_FOREACH(ports.control, event) {
 				if (event->body.type == uris.atom_Object) {
@@ -129,10 +134,15 @@ namespace Aether {
 			peak_out = {0,0};
 
 		update_parameter_targets();
+        INTERVAL_END(INTRO_STUFF);
+        INTERVAL(SAMPLE_LOOP);
 		for (uint32_t sample = 0; sample < n_samples; ++sample) {
+            INTERVAL(UPDATE_PARAMETERS);
 			update_parameters();
+            INTERVAL_END(UPDATE_PARAMETERS);
 
 			// Dry
+            INTERVAL(DRY);
 			float dry_level = params.dry_level/100.f;
 			float dry_left = ports.audio_in_left[sample];
 			float dry_right = ports.audio_in_right[sample];
@@ -140,8 +150,10 @@ namespace Aether {
 				ports.audio_out_left[sample] = dry_level*dry_left;
 				ports.audio_out_right[sample] = dry_level*dry_right;
 			}
+            INTERVAL_END(DRY);
 
 			// Predelay
+            INTERVAL(PREDELAY);
 			float predelay_level = params.predelay_level/100.f;
 			float predelay_left = dry_left;
 			float predelay_right = dry_right;
@@ -158,8 +170,10 @@ namespace Aether {
 				ports.audio_out_left[sample] += predelay_level*predelay_left;
 				ports.audio_out_right[sample] += predelay_level*predelay_right;
 			}
+            INTERVAL_END(PREDELAY);
 
 			// Early Reflections
+            INTERVAL(EARLY_REFLECTIONS);
 			float early_level = params.early_level/100.f;
 			float early_left = predelay_left;
 			float early_right = predelay_right;
@@ -200,8 +214,10 @@ namespace Aether {
 				ports.audio_out_left[sample] += early_level*early_left;
 				ports.audio_out_right[sample] += early_level*early_right;
 			}
+            INTERVAL_END(EARLY_REFLECTIONS);
 
 			// Late Reverberations
+            INTERVAL(LATE_REVERB);
 			float late_level = params.late_level/100.f;
 			float late_left = early_left;
 			float late_right = early_right;
@@ -226,13 +242,17 @@ namespace Aether {
 				ports.audio_out_left[sample] += late_level*late_left;
 				ports.audio_out_right[sample] += late_level*late_right;
 			}
+            INTERVAL_END(LATE_REVERB);
 
+            INTERVAL(AUDIO_OUT);
 			{
 				float mix = params.mix/100.f;
 				ports.audio_out_left[sample] = math::lerp(dry_left, ports.audio_out_left[sample], mix);
 				ports.audio_out_right[sample] = math::lerp(dry_right, ports.audio_out_right[sample], mix);
 			}
+            INTERVAL_END(AUDIO_OUT);
 
+            INTERVAL(PEAKS);
 			if (notify_ui) {
 				peak_dry.first = std::max(peak_dry.first, std::abs(dry_left));
 				peak_dry.second = std::max(peak_dry.second, std::abs(dry_right));
@@ -247,7 +267,10 @@ namespace Aether {
 				peak_out.first = std::max(peak_out.first, std::abs(ports.audio_out_left[sample]));
 				peak_out.second = std::max(peak_out.second, std::abs(ports.audio_out_right[sample]));
 			}
+            INTERVAL_END(PEAKS);
 		}
+        INTERVAL_END(SAMPLE_LOOP);
+        INTERVAL(NOTIFY_UI);
 		if (notify_ui) {
 			// write peak data
 			lv2_atom_forge_frame_time(&atom_forge, 0);
@@ -277,6 +300,8 @@ namespace Aether {
 			write_sample_data_atom(1, static_cast<int>(m_rate), n_samples, ports.audio_out_left, ports.audio_out_right);
 			lv2_atom_forge_pop(&atom_forge, &seq_frame);
 		}
+        INTERVAL_END(NOTIFY_UI);
+        INTERVAL_END(PROCESS);
 	}
 
 	size_t DSP::sizeof_peak_data_atom() noexcept {
