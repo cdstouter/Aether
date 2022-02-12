@@ -238,8 +238,8 @@ namespace Aether {
 				peak_dry.second = std::max(peak_dry.second, std::abs(dry_right));
 				peak_dry_stage.first = std::max(peak_dry_stage.first, std::abs(dry_left*dry_level));
 				peak_dry_stage.second = std::max(peak_dry_stage.second, std::abs(dry_right*dry_level));
-				//peak_predelay_stage.first = std::max(peak_predelay_stage.first, std::abs(predelay_left*predelay_level));
-				//peak_predelay_stage.second = std::max(peak_predelay_stage.second, std::abs(predelay_right*predelay_level));
+				peak_predelay_stage.first = std::max(peak_predelay_stage.first, std::abs(predelay_left*predelay_level));
+				peak_predelay_stage.second = std::max(peak_predelay_stage.second, std::abs(predelay_right*predelay_level));
 				peak_early_stage.first = std::max(peak_early_stage.first, std::abs(early_left*early_level));
 				peak_early_stage.second = std::max(peak_early_stage.second, std::abs(early_right*early_level));
 				peak_late_stage.first = std::max(peak_late_stage.first, std::abs(late_left*late_level));
